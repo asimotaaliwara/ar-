@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arıçı Rəhbəri</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FFC107">
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/genai": "https://esm.sh/@google/genai@^0.12.0"
+        }
+      }
+    </script>
+    <script type="module" src="index.tsx"></script>
+</head>
+<body>
+    <div id="app-container">
+        <header>
+            <svg id="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+                <path d="M20,12.5c0-0.8-0.4-1.5-1-2c-0.2-1.2-0.8-2.4-1.7-3.3c-1-1-2.2-1.7-3.5-2C13.1,4.4,12.4,4,11.5,4c-0.8,0-1.5,0.4-2,1 c-1.2,0.2-2.4,0.8-3.3,1.7c-1,1-1.7,2.2-2,3.5C4.4,10.9,4,11.6,4,12.5c0,0.8,0.4,1.5,1,2c0.2,1.2,0.8,2.4,1.7,3.3 c1,1,2.2,1.7,3.5,2c0.6,0.6,1.2,1,2,1c0.8,0,1.5-0.4,2-1c1.2-0.2,2.4-0.8,3.3-1.7c1-1,1.7-2.2,2-3.5 C19.6,14.1,20,13.4,20,12.5z M10.5,16c-1.9,0-3.5-1.6-3.5-3.5S8.6,9,10.5,9s3.5,1.6,3.5,3.5S12.4,16,10.5,16z M15,14 c-0.8,0-1.5-0.7-1.5-1.5S14.2,11,15,11s1.5,0.7,1.5,1.5S15.8,14,15,14z"/>
+            </svg>
+            <h1 id="header-title">Pətəklərim</h1>
+        </header>
+        
+        <main>
+            <!-- Pətəklərim View -->
+            <div id="hives-view" class="view active">
+                <div id="hives-list"></div>
+                <button id="add-hive-fab" class="fab" aria-label="Yeni pətək əlavə et">+</button>
+            </div>
+
+            <!-- AI Məsləhət View -->
+            <div id="ai-view" class="view">
+                <div class="content-wrapper">
+                    <p>Arıçılıq təsərrüfatınızın ümumi vəziyyəti haqqında Aİ-dən məsləhət almaq üçün aşağıdakı düyməyə basın. Analiz, "Pətəklərim" bölməsindəki bütün qeydlərinizə əsaslanacaq.</p>
+                    <button id="get-ai-advice-btn" class="action-btn">Aİ Məsləhəti Al</button>
+                    <div id="ai-advice-result" class="result-container"></div>
+                </div>
+            </div>
+
+            <!-- Şəkil Analizi View -->
+            <div id="image-view" class="view">
+                 <div class="content-wrapper">
+                    <p>Pətəyinizdən bir şəkil yükləyərək xəstəlik, ana arı vəziyyəti və digər məsələlər haqqında Aİ analizi əldə edin.</p>
+                    <select id="hive-select-for-image" class="hive-select"></select>
+                    <input type="file" id="image-upload-input" accept="image/*" style="display: none;">
+                    <button id="upload-image-btn" class="action-btn">Şəkil Seç</button>
+                    <img id="image-preview" src="" alt="Yüklənən şəklin önbaxışı" style="display:none;" />
+                    <button id="analyze-image-btn" class="action-btn" disabled>Şəkli Analiz Et</button>
+                    <div id="image-analysis-result" class="result-container"></div>
+                </div>
+            </div>
+
+            <!-- FAQ View -->
+            <div id="faq-view" class="view">
+                <div id="faq-list" class="content-wrapper"></div>
+            </div>
+        </main>
+
+        <nav id="bottom-nav">
+            <button class="nav-btn active" data-view="hives-view" aria-label="Pətəklərim">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5-10-5-10 5zM2 12l10 5 10-5-10-5-10 5z"/></svg>
+                <span>Pətəklərim</span>
+            </button>
+            <button class="nav-btn" data-view="ai-view" aria-label="Aİ Məsləhət">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-5 14.5a.5.5 0 01-1 0V16a.5.5 0 011 0v.5zm2.5-.5a.5.5 0 01-1 0v-1.5a.5.5 0 011 0V16zm2.5 0a.5.5 0 01-1 0v-1.5a.5.5 0 011 0V16zm2.5-.5a.5.5 0 01-1 0V16a.5.5 0 011 0v.5zm2.5.5a.5.5 0 01-1 0v-.5a.5.5 0 011 0v.5zM12 4a8 8 0 00-6.32 12.9A1.5 1.5 0 017 15.5V14a1 1 0 011-1h8a1 1 0 011 1v1.5a1.5 1.5 0 011.32 1.4A8 8 0 0012 4z"/></svg>
+                <span>Aİ Məsləhət</span>
+            </button>
+            <button class="nav-btn" data-view="image-view" aria-label="Şəkil Analizi">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                <span>Şəkil Analizi</span>
+            </button>
+            <button class="nav-btn" data-view="faq-view" aria-label="Tez-tez verilən suallar">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
+                <span>FAQ</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Add Hive Modal -->
+    <div id="add-hive-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Yeni Pətək Əlavə Et</h2>
+            <form id="add-hive-form">
+                <label for="hive-name">Pətəyin Adı/Nömrəsi:</label>
+                <input type="text" id="hive-name" required>
+                <label for="hive-location">Yerləşdiyi Məkan:</label>
+                <input type="text" id="hive-location">
+                <button type="submit">Əlavə Et</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Add Inspection Modal -->
+    <div id="add-inspection-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Yoxlama Hesabatı Əlavə Et</h2>
+            <form id="add-inspection-form">
+                <input type="hidden" id="inspection-hive-id">
+                <div class="form-group">
+                    <label>Ana arı varmı?</label>
+                    <div class="radio-group">
+                        <input type="radio" id="queen-yes" name="queen" value="yes" checked><label for="queen-yes">Bəli</label>
+                        <input type="radio" id="queen-no" name="queen" value="no"><label for="queen-no">Xeyr</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Xəstəlik əlaməti varmı?</label>
+                    <div class="radio-group">
+                         <input type="radio" id="disease-yes" name="disease" value="yes"><label for="disease-yes">Bəli</label>
+                        <input type="radio" id="disease-no" name="disease" value="no" checked><label for="disease-no">Xeyr</label>
+                    </div>
+                </div>
+                 <div class="form-group">
+                    <label>Yumurta (qurd) varmı?</label>
+                    <div class="radio-group">
+                        <input type="radio" id="eggs-yes" name="eggs" value="yes" checked><label for="eggs-yes">Bəli</label>
+                        <input type="radio" id="eggs-no" name="eggs" value="no"><label for="eggs-no">Xeyr</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Bal ehtiyatı nə qədərdir?</label>
+                    <select id="honey-stores" name="honey-stores">
+                        <option value="good">Yaxşı</option>
+                        <option value="sufficient" selected>Kifayət qədər</option>
+                        <option value="low">Az</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Yemləmə edildimi?</label>
+                    <div class="radio-group">
+                        <input type="radio" id="feeding-yes" name="feeding" value="yes"><label for="feeding-yes">Bəli</label>
+                        <input type="radio" id="feeding-no" name="feeding" value="no" checked><label for="feeding-no">Xeyr</label>
+                    </div>
+                </div>
+                <div id="feeding-amount-group" class="form-group" style="display: none;">
+                    <label for="feeding-amount">Nə qədər yem verildi? (məs. 1L şərbət)</label>
+                    <input type="text" id="feeding-amount" name="feeding-amount">
+                </div>
+                <div class="form-group">
+                    <label for="general-notes">Əlavə qeydlər:</label>
+                    <textarea id="general-notes" name="general-notes" rows="3"></textarea>
+                </div>
+                <button type="submit">Yadda Saxla</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="modal" style="display: none;">
+        <div class="spinner"></div>
+        <p>Aİ analiz edir...</p>
+    </div>
+</body>
+</html>
